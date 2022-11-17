@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lw.familysystem.video.mapper.VideoPhysicsInfoMapper">
+
+    <sql id="tableName">
+        video_physics_info
+    </sql>
+
+    <resultMap id="videoInfoVoResultMap" type="com.lw.familysystem.vo.VideoPhysicsInfoVo">
+        <id property="videoId" column="video_id"/>
+        <result property="videoName" column="video_name"/>
+        <result property="infoId" column="info_id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="quarterInfo" column="quarter_info"/>
+        <result property="relativePath" column="relative_path"/>
+        <result property="createTimeFmt" column="create_time_fmt"/>
+        <result property="updateTimeFmt" column="update_time_fmt"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="refreshVideoPhysicsInfo2DB" parameterType="VideoPhysicsInfo">
+        insert into <include refid="tableName"/>
+            (video_name,info_id,order_no,quarter_info,relative_path)
+        values
+        <foreach collection="vos" item="vo" separator=",">
+            (#{vo.videoName},#{vo.infoId},#{vo.orderNo},#{vo.quarterInfo},#{vo.relativePath})
+        </foreach>
+    </insert>
+
+    <insert id="addVideoPhysicsInfo" parameterType="VideoPhysicsInfo">
+        insert into <include refid="tableName"/>(video_name,info_id,order_no,quarter_info,relative_path)
+        values (#{vo.videoName},#{vo.infoId},#{vo.orderNo},#{vo.quarterInfo},#{vo.relativePath})
+    </insert>
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lw.familysystem.video.mapper.VideoInfoMapper">
+
+    <resultMap id="videoInfoVoResultMap" type="com.lw.familysystem.vo.VideoInfoVo">
+        <id property="infoId" column="info_id"/>
+        <result property="videoName" column="video_name"/>
+        <result property="videoType" column="video_type"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="relativePath" column="relative_path"/>
+        <result property="createTimeFmt" column="create_time_fmt"/>
+        <result property="updateTimeFmt" column="update_time_fmt"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="refreshVideoInfo2DB" parameterType="VideoInfo">
+        insert into video_info(video_name,video_type,order_no,category_id,relative_path)
+        values
+        <foreach collection="vos" item="vo" separator=",">
+            (#{vo.videoName},#{vo.videoType},#{vo.orderNo},#{vo.categoryId},#{vo.relativePath})
+        </foreach>
+    </insert>
+
+    <insert id="addVideoInfo" parameterType="VideoInfo" keyProperty="infoId" useGeneratedKeys="true">
+        insert into video_info(video_name,video_type,order_no,category_id,relative_path)
+        values (#{vo.videoName},#{vo.videoType},#{vo.orderNo},#{vo.categoryId},#{vo.relativePath})
+    </insert>
+
+    <select id="findVideoInfoByPage" resultMap="videoInfoVoResultMap" parameterType="VideoInfo">
+        select t.*,
+                date_format(t.create_time,'%Y/%m/%d %H:%i') as create_time_fmt,
+                date_format(t.update_time,'%Y/%m/%d %H:%i') as update_time_fmt
+        from video_info t
+        <where>
+            <if test="vo.videoName!='' and vo.videoName!=null">
+                and t.video_name like concat(#{vo.videoName},'%')
+            </if>
+            <if test="vo.categoryId!='' and vo.categoryId!=null">
+                and t.category_id like concat(#{vo.categoryId},'%')
+            </if>
+        </where>
+        order by t.order_no
+    </select>
+
+    <select id="findAllVideoInfo" resultMap="videoInfoVoResultMap">
+        select t.* from video_info t
+    </select>
+
+    <select id="findVideoInfoById" resultMap="videoInfoVoResultMap" parameterType="Integer">
+        select t.* from video_info t where t.info_id = #{id}
+    </select>
+</mapper>

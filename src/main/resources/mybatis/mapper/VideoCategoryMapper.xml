@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lw.familysystem.video.mapper.VideoCategoryMapper">
+
+    <resultMap id="categoryVoResultMap" type="com.lw.familysystem.vo.VideoCategoryVo">
+        <id property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="createTimeFmt" column="create_time_fmt"/>
+        <result property="updateTimeFmt" column="update_time_fmt"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="addCategory" parameterType="VideoCategory">
+        insert into video_category(category_name) values(#{vo.categoryName})
+    </insert>
+
+    <select id="findAllCategories" resultMap="categoryVoResultMap">
+        select t.*,
+               date_format(t.create_time,'%Y/%m/%d %H:%i') as create_time_fmt,
+               date_format(t.update_time,'%Y/%m/%d %H:%i') as update_time_fmt
+        from video_category t
+    </select>
+
+
+    <select id="findCategoriesByPage" resultMap="categoryVoResultMap" parameterType="VideoCategoryVo">
+        select t.*,
+               date_format(t.create_time,'%Y/%m/%d %H:%i') as create_time_fmt,
+               date_format(t.update_time,'%Y/%m/%d %H:%i') as update_time_fmt
+        from video_category t
+        <where>
+            <if test="vo.categoryName!=null and vo.categoryName!=''">
+                and t.category_name = #{vo.categoryName}
+            </if>
+        </where>
+    </select>
+
+</mapper>
