@@ -1,6 +1,5 @@
 package com.lw.familysystem.cache;
 
-import com.lw.familysystem.vo.DirectoryInfoVo;
 import com.lw.familysystem.vo.HistoryVideoVo;
 import com.lw.familysystem.vo.VideoInfoVo;
 import lombok.Data;
@@ -19,43 +18,11 @@ import java.util.*;
 @Slf4j
 @Component
 public class FamilyCache {
-
-    /**
-     * 目录缓存
-     * key：filePath
-     */
-    private static Map<String, DirectoryInfoVo> dirsCache = new HashMap<>();
-
-    /**
-     * 视频信息缓存
-     * Key: filePath 此处是绝对路径，带了文件名和路径
-     * Key: vId
-     */
-    private static Map<String, VideoInfoVo> videoInfoCache = new HashMap<>();
-
     /**
      * 播放历史
      * key: accountName
      */
     private static Map<String, List<HistoryVideoVo>> historyCache = new HashMap<>();
-
-    /**
-     * 放入缓存
-     *
-     * @param vo
-     * @return
-     */
-    public static String putDirCache(DirectoryInfoVo vo) {
-        String key = vo.getPath();
-        dirsCache.put(key, vo);
-        return key;
-    }
-
-    public static String putVideoCache(VideoInfoVo vo) {
-        String key = "" + vo.getFilePath().hashCode();
-        videoInfoCache.put(key, vo);
-        return key;
-    }
 
     public static String putVideoHistoryCache(HistoryVideoVo vo) {
         String key = vo.getAccountName();
@@ -81,37 +48,6 @@ public class FamilyCache {
         return key;
     }
 
-    /**
-     * 刷新缓存
-     *
-     * @param filePath
-     * @param vo
-     */
-    public static void refreshDirInfo(String filePath, DirectoryInfoVo vo) {
-        dirsCache.put(filePath, vo);
-    }
-
-    public static void refreshVideoInfo(String filePath, VideoInfoVo vo) {
-        videoInfoCache.put("" + filePath.hashCode(), vo);
-    }
-
-    /**
-     * 获取缓存信息
-     *
-     * @param filePath
-     * @return
-     */
-    public static DirectoryInfoVo getDirectoryInfo(String filePath) {
-        if (hasDirInfo(filePath)) {
-            return dirsCache.get(filePath);
-        }
-        return null;
-    }
-
-    public static VideoInfoVo getVideoInfo(String vId) {
-        return videoInfoCache.get(vId);
-    }
-
     public static List<HistoryVideoVo> getHistoryInfo(String accountName) {
         return historyCache.get(accountName);
     }
@@ -130,20 +66,6 @@ public class FamilyCache {
             }
         }
         return retHistory;
-    }
-
-    /**
-     * 判断是否在缓存中
-     *
-     * @param filePath
-     * @return
-     */
-    public static boolean hasDirInfo(String filePath) {
-        return dirsCache.containsKey(filePath);
-    }
-
-    public static boolean hasVideoInfo(String filePath) {
-        return videoInfoCache.containsKey(filePath);
     }
 
     /**

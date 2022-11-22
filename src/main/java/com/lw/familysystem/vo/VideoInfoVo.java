@@ -5,10 +5,7 @@ import lombok.Data;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author lw
@@ -17,6 +14,9 @@ import java.util.UUID;
  */
 @Data
 public class VideoInfoVo extends VideoInfo implements Serializable {
+
+    private String createTimeFmt;
+    private String updateTimeFmt;
 
     private static final long serialVersionUID = 2L;
 

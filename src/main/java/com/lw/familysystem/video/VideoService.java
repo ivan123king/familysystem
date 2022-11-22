@@ -4,11 +4,12 @@ import com.coremedia.iso.IsoFile;
 import com.lw.config.mybatis.page.Page;
 import com.lw.config.mybatis.page.PageRequest;
 import com.lw.familysystem.cache.FamilyCache;
+import com.lw.familysystem.entity.VideoInfo;
+import com.lw.familysystem.entity.VideoPhysicsInfo;
 import com.lw.familysystem.video.mapper.VideoCategoryMapper;
-import com.lw.familysystem.vo.DirectoryInfoVo;
-import com.lw.familysystem.vo.HistoryVideoVo;
-import com.lw.familysystem.vo.VideoCategoryVo;
-import com.lw.familysystem.vo.VideoInfoVo;
+import com.lw.familysystem.video.mapper.VideoInfoMapper;
+import com.lw.familysystem.video.mapper.VideoPhysicsInfoMapper;
+import com.lw.familysystem.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,113 +42,35 @@ public class VideoService {
 
     @Autowired
     private VideoCategoryMapper categoryMapper;
+    @Autowired
+    private VideoInfoMapper videoInfoMapper;
+    @Autowired
+    private VideoPhysicsInfoMapper videoPhysicsInfoMapper;
 
+    /**
+     * 获取类别
+     * @return
+     */
     public List<VideoCategoryVo> findAllCategories(){
         return this.categoryMapper.findAllCategories();
     }
 
-    public Page<VideoCategoryVo> findCategoriesByPage(){
-        VideoCategoryVo vo = new VideoCategoryVo();
-//        vo.setCategoryName("电影");
-        PageRequest pageRequest = new PageRequest(1,3);
-        return this.categoryMapper.findCategoriesByPage(vo,pageRequest);
+    public Page<VideoInfoVo> findVideoInfoByPage(VideoInfo param,PageRequest pageRequest){
+        return this.videoInfoMapper.findVideoInfoByPage(param,pageRequest);
+    }
+
+    public Page<VideoPhysicsInfoVo> findVideoPhysicsInfoByPage(VideoPhysicsInfo param,PageRequest pageRequest){
+        return this.videoPhysicsInfoMapper.findVideoPhysicsInfoByPage(param,pageRequest);
     }
 
     /**
-     * 生成目录信息
-     *
+     * 获取季度信息
+     * @param infoId
      * @return
      */
-//    @PostConstruct
-    public void createDirectoryTree() {
-        DirectoryInfoVo vo = new DirectoryInfoVo();
-        this.getAllInfoRecursive(ROOT_PATH, vo);
-        vo.putAllInfo2Cache();
+    public List<String> findQuarterInfo(int infoId){
+        return this.videoPhysicsInfoMapper.findQuarterInfo(infoId);
     }
-
-    public DirectoryInfoVo getRootDirectoryInfo(){
-        return this.getDirectoryInfo(ROOT_PATH,false);
-    }
-
-    /**
-     * 获取目录信息
-     *
-     * @param filePath
-     * @param refresh
-     * @return
-     */
-    public DirectoryInfoVo getDirectoryInfo(String filePath, boolean refresh) {
-        File file = new File(filePath);
-        if (!file.isDirectory()) {
-            return null;
-        }
-
-        DirectoryInfoVo vo = new DirectoryInfoVo();
-        if (!refresh && FamilyCache.hasDirInfo(filePath)) {
-            vo = FamilyCache.getDirectoryInfo(filePath);
-        }
-        if (refresh || vo == null) {
-            this.getAllInfoRecursive(filePath, vo);
-            FamilyCache.refreshDirInfo(filePath, vo);
-        }
-        return vo;
-    }
-
-    /**
-     * 递归处理获取目录信息
-     *
-     * @param dirPath
-     * @param vo
-     */
-    private void getAllInfoRecursive(String dirPath, DirectoryInfoVo vo) {
-        File dirFile = new File(dirPath);
-        if (dirFile.isDirectory()) {
-            vo.setName(dirFile.getName());
-            vo.setPath(dirFile.getAbsolutePath());
-
-            File[] files = dirFile.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    DirectoryInfoVo childDir = new DirectoryInfoVo();
-                    getAllInfoRecursive(file.getAbsolutePath(), childDir);
-                    vo.addChildDir(childDir);
-                } else {
-                    VideoInfoVo videoInfoVo = new VideoInfoVo();
-                    videoInfoVo.setFilePath(file.getAbsolutePath());
-                    videoInfoVo.setName(file.getName());
-                    vo.addVideo(videoInfoVo);
-                }
-            }
-        }
-    }
-
-    public VideoInfoVo getVideoInfo(String filePath) {
-        File file = new File(filePath);
-        if (!file.isFile()) {
-            return null;
-        }
-        VideoInfoVo vo = new VideoInfoVo();
-        try {
-            IsoFile isoFile = new IsoFile(filePath);
-            long lengthInSeconds =
-                    isoFile.getMovieBox().getMovieHeaderBox().getDuration() /
-                            isoFile.getMovieBox().getMovieHeaderBox().getTimescale();
-            vo.setLongTime(lengthInSeconds);
-            vo.setSizeB(isoFile.getSize());
-            vo.setSizeM(vo.getSizeB() / 1024 / 1024);
-            vo.setVideoAllInfo(file);
-            if (!FamilyCache.hasVideoInfo(filePath)) {
-                FamilyCache.putVideoCache(vo);
-            }
-        } catch (Exception e) {
-            log.error("", e);
-        }
-        return vo;
-    }
-
-
-
-
 
     /**
      * 播放视频
@@ -155,11 +78,11 @@ public class VideoService {
      * @param vo
      * @param response
      */
-    public void playVideo(Map<String, String> otherInfo, VideoInfoVo vo, HttpServletResponse response) {
-        String accountName = otherInfo.get("accountName");
+    public void playVideo(int videoId, HttpServletResponse response) {
+        VideoPhysicsInfoVo physicsInfoVo = this.videoPhysicsInfoMapper.findPhysicsInfoById(videoId);
         try  {
             OutputStream outputStream = response.getOutputStream();
-            String filePath = vo.getFilePath();
+            String filePath = ROOT_PATH+physicsInfoVo.getRelativePath();
             File file = new File(filePath);
 
             if (file.exists()) {
@@ -167,13 +90,6 @@ public class VideoService {
                 long fileLength = targetFile.length();
 
                 long range = 0;
-                if(!StringUtils.isEmpty(accountName)){
-                    //发现如果跳过某些数据的话，前端video组件无法加载。
-//                    HistoryVideoVo history = FamilyCache.getHistoryInfo(accountName, vo);
-//                    if(history!=null){
-//                       range = history.getRange();
-//                    }
-                }
                 /*
                     解决： java.io.IOException: 你的主机中的软件中止了一个已建立的连接
                     获取服务器视频流时可能存在跨域问题
@@ -231,29 +147,32 @@ public class VideoService {
      * @param vo
      * @param response
      */
-    public void downloadVideo(Map<String, String> otherInfo, VideoInfoVo vo, HttpServletResponse response) {
+    public void downloadVideo(int videoId,HttpServletResponse response) {
         try (OutputStream outputStream = response.getOutputStream()) {
-            String fileName = vo.getName();
-            String filePath = vo.getFilePath();
+            VideoPhysicsInfoVo vo = this.videoPhysicsInfoMapper.findPhysicsInfoById(videoId);
+            if(vo==null){
+                return;
+            }
+            String filePath = ROOT_PATH+vo.getRelativePath();
             File file = new File(filePath);
 
             if (file.exists()) {
                 RandomAccessFile targetFile = new RandomAccessFile(file, "r");
                 long fileLength = targetFile.length();
                 //设置响应头，把文件名字设置好
-                response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+                response.setHeader("Content-Disposition", "attachment; filename=" + vo.getVideoName()+".mp4");
                 //设置文件长度
                 response.setHeader("Content-Length", String.valueOf(fileLength));
                 //解决编码问题
                 response.setHeader("Content-Type", "application/octet-stream");
-
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 byte[] cache = new byte[1024 * 300];
                 int flag;
                 while ((flag = targetFile.read(cache)) != -1) {
                     outputStream.write(cache, 0, flag);
                 }
             } else {
-                String message = "file: not exists";
+                String message = "文件不存在";
                 //解决编码问题
                 response.setHeader("Content-Type", "application/json");
                 outputStream.write(message.getBytes(StandardCharsets.UTF_8));

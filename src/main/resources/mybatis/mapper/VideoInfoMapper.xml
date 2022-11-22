@@ -40,7 +40,7 @@
                 and t.video_name like concat(#{vo.videoName},'%')
             </if>
             <if test="vo.categoryId!='' and vo.categoryId!=null">
-                and t.category_id like concat(#{vo.categoryId},'%')
+                and t.category_id = #{vo.categoryId}
             </if>
         </where>
         order by t.order_no

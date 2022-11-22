@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lw.familysystem.video.mapper.VideoPlayHistoryMapper">
+
+    <resultMap id="videoHistoryVoResultMap" type="com.lw.familysystem.vo.VideoPlayHistoryVo">
+        <id property="historyId" column="history_id"/>
+        <result property="videoId" column="video_id"/>
+        <result property="accountName" column="account_name"/>
+        <result property="playTime" column="play_time"/>
+        <result property="playTimeVis" column="play_time_vis"/>
+        <result property="createTimeFmt" column="create_time_fmt"/>
+        <result property="updateTimeFmt" column="update_time_fmt"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        
+        <association property="videoPhysicsInfoVo" javaType="VideoPhysicsInfoVo">
+            <id property="videoId" column="video_id"/>
+            <result property="videoName" column="video_name"/>
+            <result property="infoId" column="info_id"/>
+            <result property="orderNo" column="order_no"/>
+            <result property="quarterInfo" column="quarter_info"/>
+            <result property="relativePath" column="relative_path"/>
+            <result property="createTimeFmt" column="create_time_fmt"/>
+            <result property="updateTimeFmt" column="update_time_fmt"/>
+            <result property="createTime" column="create_time"/>
+            <result property="updateTime" column="update_time"/>
+        </association>
+
+        <association property="videoInfoVo" javaType="VideoInfoVo">
+            <id property="infoId" column="info_id"/>
+            <result property="videoName" column="info_name"/>
+            <result property="videoType" column="video_type"/>
+            <result property="orderNo" column="order_no"/>
+            <result property="categoryId" column="category_id"/>
+            <result property="relativePath" column="relative_path"/>
+            <result property="createTimeFmt" column="create_time_fmt"/>
+            <result property="updateTimeFmt" column="update_time_fmt"/>
+            <result property="createTime" column="create_time"/>
+            <result property="updateTime" column="update_time"/>
+        </association>
+        
+    </resultMap>
+
+    <insert id="addVideoHistory" parameterType="VideoPlayHistory">
+        insert into video_play_history(video_id,account_name,play_time,play_time_vis)
+        values (#{vo.videoId},#{vo.accountName},#{vo.playTime},#{vo.playTimeVis})
+    </insert>
+
+    <update id="updateVideoHistory" parameterType="VideoPlayHistory">
+        update video_play_history t set t.update_time = now(),
+                                        t.play_time = #{vo.playTime},
+                                        t.play_time_vis = #{vo.playTimeVis}
+        where t.video_id = #{vo.videoId}
+    </update>
+
+    <select id="findVideoHistoryByPage" resultMap="videoHistoryVoResultMap" parameterType="VideoPlayHistory">
+        select t.*,
+               v.video_name,
+               v.info_id,
+               i.video_name as info_name,
+        date_format(t.create_time,'%Y/%m/%d %H:%i') as create_time_fmt,
+        date_format(t.update_time,'%Y/%m/%d %H:%i') as update_time_fmt
+        from video_play_history t
+        left join video_physics_info v on t.video_id = v.video_id
+        left join video_info i on v.info_id = i.info_id
+        <where>
+            <if test="vo.accountName!='' and vo.accountName!=null">
+                and t.account_name = #{vo.accountName}
+            </if>
+        </where>
+        order by t.update_time desc
+    </select>
+
+    <select id="findVideoHistoryByVideoId" resultMap="videoHistoryVoResultMap">
+        select t.* from video_play_history t where t.video_id = #{videoId} and t.account_name = #{accountName}
+    </select>
+</mapper>

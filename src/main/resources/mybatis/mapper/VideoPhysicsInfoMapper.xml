@@ -34,4 +34,23 @@
         insert into <include refid="tableName"/>(video_name,info_id,order_no,quarter_info,relative_path)
         values (#{vo.videoName},#{vo.infoId},#{vo.orderNo},#{vo.quarterInfo},#{vo.relativePath})
     </insert>
+
+    <select id="findVideoPhysicsInfoByPage" parameterType="VideoPhysicsInfo" resultMap="videoInfoVoResultMap">
+        select t.* from <include refid="tableName"/> t
+        <where>
+            <if test="vo.infoId!='' and vo.infoId!=null">
+                and t.info_id = #{vo.infoId}
+            </if>
+            <if test="vo.quarterInfo!=null and vo.quarterInfo!=''">
+                and t.quarter_info = #{vo.quarterInfo}
+            </if>
+        </where>
+        order by t.order_no
+    </select>
+
+    <select id="findPhysicsInfoById" parameterType="Integer" resultMap="videoInfoVoResultMap">
+        select t.* from <include refid="tableName"/> t
+        where t.video_id = #{id}
+    </select>
+
 </mapper>

@@ -2,6 +2,7 @@ package com.lw.familysystem.video.mapper;
 
 
 import com.lw.config.mybatis.page.Page;
+import com.lw.config.mybatis.page.PageRequest;
 import com.lw.familysystem.entity.VideoInfo;
 import com.lw.familysystem.vo.VideoInfoVo;
 import org.apache.ibatis.annotations.Mapper;
@@ -26,7 +27,7 @@ public interface VideoInfoMapper {
      * @param vo
      * @return
      */
-    Page<VideoInfoVo> findVideoInfoByPage(@Param("vo") VideoInfo vo);
+    Page<VideoInfoVo> findVideoInfoByPage(@Param("vo") VideoInfo vo, PageRequest pageRequest);
 
     VideoInfoVo findVideoInfoById(@Param("id")int id);
 

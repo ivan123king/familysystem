@@ -16,6 +16,23 @@ import java.io.IOException;
  */
 @Slf4j
 public class VideoUtils {
+
+    /**
+     * 将秒数转化为时分秒格式
+     *
+     * @param time
+     * @return
+     */
+    public static String getVideoTimeFormat(long time) {
+        int temp = (int) time;
+        int hh = temp / 3600;
+        int mm = (temp % 3600) / 60;
+        int ss = (temp % 3600) % 60;
+        return (hh < 10 ? ("0" + hh) : hh) + ":" +
+                (mm < 10 ? ("0" + mm) : mm) + ":" +
+                (ss < 10 ? ("0" + ss) : ss);
+    }
+
     /**
      * 获取视频文件的播放长度(mp4、mov格式)
      * @param videoPath

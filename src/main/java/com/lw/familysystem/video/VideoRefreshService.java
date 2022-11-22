@@ -164,38 +164,4 @@ public class VideoRefreshService {
             this.videoPhysicsInfoMapper.refreshVideoPhysicsInfo2DB(physicsInfos);
         }
     }
-
-    private void getDirInfoRecursive(String dirPath, List<VideoInfoVo> videos) {
-        File dirFile = new File(dirPath);
-        if (dirFile.isDirectory()) {
-            VideoInfoVo videoInfoVo = new VideoInfoVo();
-            videoInfoVo.setFilePath(dirFile.getAbsolutePath());
-            videoInfoVo.setName(dirFile.getName());
-            videos.add(videoInfoVo);
-
-            File[] files = dirFile.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    getDirInfoRecursive(file.getAbsolutePath(), videos);
-                }
-            }
-        }
-    }
-
-    private void getFileInfoRecursive(String dirPath, List<VideoInfoVo> videos) {
-        File dirFile = new File(dirPath);
-        if (dirFile.isDirectory()) {
-            File[] files = dirFile.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    getFileInfoRecursive(file.getAbsolutePath(), videos);
-                } else {
-                    VideoInfoVo videoInfoVo = new VideoInfoVo();
-                    videoInfoVo.setFilePath(file.getAbsolutePath());
-                    videoInfoVo.setName(file.getName());
-                    videos.add(videoInfoVo);
-                }
-            }
-        }
-    }
 }
