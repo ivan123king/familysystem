@@ -15,6 +15,8 @@
         <result property="orderNo" column="order_no"/>
         <result property="quarterInfo" column="quarter_info"/>
         <result property="relativePath" column="relative_path"/>
+        <result property="videoLongTime" column="video_long_time"/>
+        <result property="videoLongTimeVis" column="video_long_time_vis"/>
         <result property="createTimeFmt" column="create_time_fmt"/>
         <result property="updateTimeFmt" column="update_time_fmt"/>
         <result property="createTime" column="create_time"/>
@@ -23,17 +25,23 @@
 
     <insert id="refreshVideoPhysicsInfo2DB" parameterType="VideoPhysicsInfo">
         insert into <include refid="tableName"/>
-            (video_name,info_id,order_no,quarter_info,relative_path)
+            (video_name,info_id,order_no,quarter_info,relative_path,video_long_time,video_long_time_vis)
         values
         <foreach collection="vos" item="vo" separator=",">
-            (#{vo.videoName},#{vo.infoId},#{vo.orderNo},#{vo.quarterInfo},#{vo.relativePath})
+            (#{vo.videoName},#{vo.infoId},#{vo.orderNo},#{vo.quarterInfo},#{vo.relativePath},#{vo.videoLongTime},#{vo.videoLongTimeVis})
         </foreach>
     </insert>
 
     <insert id="addVideoPhysicsInfo" parameterType="VideoPhysicsInfo">
-        insert into <include refid="tableName"/>(video_name,info_id,order_no,quarter_info,relative_path)
-        values (#{vo.videoName},#{vo.infoId},#{vo.orderNo},#{vo.quarterInfo},#{vo.relativePath})
+        insert into <include refid="tableName"/>(video_name,info_id,order_no,quarter_info,relative_path,video_long_time,video_long_time_vis)
+        values (#{vo.videoName},#{vo.infoId},#{vo.orderNo},#{vo.quarterInfo},#{vo.relativePath},#{vo.videoLongTime},#{vo.videoLongTimeVis})
     </insert>
+
+    <update id="updateVideoPhysicsInfo" parameterType="VideoPhysicsInfo">
+        update <include refid="tableName"/> t
+        set t.video_long_time = #{vo.videoLongTime},t.video_long_time_vis = #{vo.videoLongTimeVis}
+        where t.video_id = #{vo.videoId}
+    </update>
 
     <select id="findVideoPhysicsInfoByPage" parameterType="VideoPhysicsInfo" resultMap="videoInfoVoResultMap">
         select t.* from <include refid="tableName"/> t
@@ -51,6 +59,11 @@
     <select id="findPhysicsInfoById" parameterType="Integer" resultMap="videoInfoVoResultMap">
         select t.* from <include refid="tableName"/> t
         where t.video_id = #{id}
+    </select>
+
+    <select id="findPhysicsInfoByRelativePath" parameterType="String" resultMap="videoInfoVoResultMap">
+        select t.* from <include refid="tableName"/> t
+        where t.relative_path = #{relativePath}
     </select>
 
 </mapper>

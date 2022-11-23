@@ -7,6 +7,7 @@ import com.lw.familysystem.video.mapper.VideoInfoMapper;
 import com.lw.familysystem.video.mapper.VideoPhysicsInfoMapper;
 import com.lw.familysystem.vo.VideoCategoryVo;
 import com.lw.familysystem.vo.VideoInfoVo;
+import com.lw.familysystem.vo.VideoPhysicsInfoVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,7 +91,7 @@ public class VideoRefreshService {
             File videoInfoRootFile = new File(filePath);
             File[] videoInfoFiles = videoInfoRootFile.listFiles();
             for (File videoInfoFile : videoInfoFiles) {
-                VideoInfo videoInfo = new VideoInfo(videoInfoFile,ROOT_PATH);
+                VideoInfo videoInfo = new VideoInfo(videoInfoFile, ROOT_PATH);
                 videoInfo.setCategoryId(categoryVo.getCategoryId());
                 videoInfos.add(videoInfo);
 
@@ -123,19 +124,25 @@ public class VideoRefreshService {
          */
         for (VideoInfo videoInfo : videoInfos) {
             //如果是单独的，其实就是mp4文件，就没必要再解析一遍
-            if(videoInfo.getVideoType().equals(VideoInfoVo.Constant.VIDEO_TYPE_DAN_DU)){
-                VideoPhysicsInfo physicsInfo = new VideoPhysicsInfo(videoInfo);
-                physicsInfos.add(physicsInfo);
-            }else{//如果是合集，则需要去解析
-                String filePath = ROOT_PATH+videoInfo.getRelativePath();
+            if (videoInfo.getVideoType().equals(VideoInfoVo.Constant.VIDEO_TYPE_DAN_DU)) {
+                VideoPhysicsInfo physicsInfo = new VideoPhysicsInfo(videoInfo,ROOT_PATH);
+
+                boolean willUpdate = this.willUpdateVideoPhysicsInfo(physicsInfo);
+                if (!willUpdate)
+                    physicsInfos.add(physicsInfo);
+            } else {//如果是合集，则需要去解析
+                String filePath = ROOT_PATH + videoInfo.getRelativePath();
                 File videoRootFile = new File(filePath);
                 File[] videos = videoRootFile.listFiles();
                 for (File video : videos) {
-                    if(video.isFile()){//第一种，直接下面是mp4文件
-                        VideoPhysicsInfo physicsInfo = new VideoPhysicsInfo(video,ROOT_PATH);
+                    if (video.isFile()) {//第一种，直接下面是mp4文件
+                        VideoPhysicsInfo physicsInfo = new VideoPhysicsInfo(video, ROOT_PATH);
                         physicsInfo.setInfoId(videoInfo.getInfoId());
-                        physicsInfos.add(physicsInfo);
-                    }else if(video.isDirectory()){//第二种，还有一层目录
+
+                        boolean willUpdate = this.willUpdateVideoPhysicsInfo(physicsInfo);
+                        if (!willUpdate)
+                            physicsInfos.add(physicsInfo);
+                    } else if (video.isDirectory()) {//第二种，还有一层目录
                         File[] videosInner = video.listFiles(new FileFilter() {
                             @Override
                             public boolean accept(File file) {
@@ -144,10 +151,13 @@ public class VideoRefreshService {
                         });
 
                         for (File videoInner : videosInner) {
-                            VideoPhysicsInfo physicsInfo = new VideoPhysicsInfo(videoInner,ROOT_PATH);
+                            VideoPhysicsInfo physicsInfo = new VideoPhysicsInfo(videoInner, ROOT_PATH);
                             physicsInfo.setInfoId(videoInfo.getInfoId());
                             physicsInfo.setQuarterInfo(video.getName());
-                            physicsInfos.add(physicsInfo);
+
+                            boolean willUpdate = this.willUpdateVideoPhysicsInfo(physicsInfo);
+                            if (!willUpdate)
+                                physicsInfos.add(physicsInfo);
                         }
                     }
                 }
@@ -163,5 +173,21 @@ public class VideoRefreshService {
         if (physicsInfos.size() > 0) {
             this.videoPhysicsInfoMapper.refreshVideoPhysicsInfo2DB(physicsInfos);
         }
+    }
+
+    /**
+     * 将更新信息
+     *
+     * @return
+     */
+    private boolean willUpdateVideoPhysicsInfo(VideoPhysicsInfo videoPhysicsInfo) {
+        VideoPhysicsInfoVo vo = this.videoPhysicsInfoMapper.findPhysicsInfoByRelativePath(videoPhysicsInfo.getRelativePath());
+        if (vo != null) {
+            //更新信息
+            videoPhysicsInfo.setVideoId(vo.getVideoId());
+            this.videoPhysicsInfoMapper.updateVideoPhysicsInfo(videoPhysicsInfo);
+            return true;
+        }
+        return false;
     }
 }

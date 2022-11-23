@@ -22,6 +22,8 @@
             <result property="orderNo" column="order_no"/>
             <result property="quarterInfo" column="quarter_info"/>
             <result property="relativePath" column="relative_path"/>
+            <result property="videoLongTime" column="video_long_time"/>
+            <result property="videoLongTimeVis" column="video_long_time_vis"/>
             <result property="createTimeFmt" column="create_time_fmt"/>
             <result property="updateTimeFmt" column="update_time_fmt"/>
             <result property="createTime" column="create_time"/>
@@ -59,6 +61,8 @@
         select t.*,
                v.video_name,
                v.info_id,
+               v.video_long_time,
+               v.video_long_time_vis,
                i.video_name as info_name,
         date_format(t.create_time,'%Y/%m/%d %H:%i') as create_time_fmt,
         date_format(t.update_time,'%Y/%m/%d %H:%i') as update_time_fmt

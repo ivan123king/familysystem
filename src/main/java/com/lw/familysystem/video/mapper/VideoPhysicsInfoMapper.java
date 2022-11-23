@@ -15,6 +15,7 @@ public interface VideoPhysicsInfoMapper {
 
     void refreshVideoPhysicsInfo2DB(@Param("vos") List<VideoPhysicsInfo> videoPhysicsInfos);
     void addVideoPhysicsInfo(@Param("vo")VideoPhysicsInfo videoPhysicsInfo);
+    void updateVideoPhysicsInfo(@Param("vo")VideoPhysicsInfo videoPhysicsInfo);
 
     Page<VideoPhysicsInfoVo> findVideoPhysicsInfoByPage(@Param("vo")VideoPhysicsInfo videoPhysicsInfo, PageRequest pageRequest);
 
@@ -22,4 +23,11 @@ public interface VideoPhysicsInfoMapper {
 
     @Select("select distinct t.quarter_info from video_physics_info t where t.info_id = #{infoId} and t.quarter_info is not null")
     List<String> findQuarterInfo(@Param("infoId")int infoId);
+
+    /**
+     * 相对路径肯定是唯一的，因为只要加上根路径就能找到这个视频硬盘地址
+     * @param relativePath
+     * @return
+     */
+    VideoPhysicsInfoVo findPhysicsInfoByRelativePath(@Param("relativePath")String relativePath);
 }
