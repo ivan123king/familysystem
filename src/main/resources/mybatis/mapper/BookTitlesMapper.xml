@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lw.familysystem.book.mapper.BookTitlesMapper">
+
+    <insert id="refreshBookTitles2DB" parameterType="BookTitles">
+        insert into book_titles(title_name,title_range,book_id,order_no)
+        values
+        <foreach collection="vos" item="vo" separator=",">
+            (#{vo.title_name},#{vo.title_range},#{vo.book_id},#{vo.order_no})
+        </foreach>
+    </insert>
+
+    <insert id="addBookTitles" parameterType="BookTitles">
+        insert into book_titles(title_name,title_range,book_id,order_no)
+        values  (#{vo.title_name},#{vo.title_range},#{vo.book_id},#{vo.order_no})
+    </insert>
+
+    <update id="updateBookTitles" parameterType="BookTitles">
+        update book_titles t set t.title_range = #{vo.title_range}
+        where t.title_id = #{vo.title_id}
+    </update>
+
+    <select id="findBookTitlesByPage" resultType="BookTitles" parameterType="BookTitles">
+        select t.*,
+                date_format(t.create_time,'%Y/%m/%d %H:%i') as create_time_fmt,
+                date_format(t.update_time,'%Y/%m/%d %H:%i') as update_time_fmt
+        from book_titles t
+        <where>
+            <if test="vo.book_id!='' and vo.book_id!=null">
+                and t.book_id = #{vo.book_id}
+            </if>
+        </where>
+        order by t.order_no
+    </select>
+</mapper>

@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 刷数据专用
@@ -78,6 +80,12 @@ public class VideoRefreshService {
     public void refreshVideoInfo2Db() {
         List<VideoCategoryVo> categoryVos = this.categoryMapper.findAllCategories();
 
+        List<VideoInfoVo> videoInfoVos = this.videoInfoMapper.findAllVideoInfo();
+        Set<String> relativePathSet = new HashSet<>();
+        for (VideoInfoVo videoInfoVo : videoInfoVos) {
+            relativePathSet.add(videoInfoVo.getRelativePath());
+        }
+
         List<VideoInfo> videoInfos = new ArrayList<>();
 
         /**
@@ -93,7 +101,10 @@ public class VideoRefreshService {
             for (File videoInfoFile : videoInfoFiles) {
                 VideoInfo videoInfo = new VideoInfo(videoInfoFile, ROOT_PATH);
                 videoInfo.setCategoryId(categoryVo.getCategoryId());
-                videoInfos.add(videoInfo);
+
+                if(!relativePathSet.contains(videoInfo.getRelativePath())){//因为没啥可更新的，所以直接跳过
+                    videoInfos.add(videoInfo);
+                }
 
                 if (videoInfos.size() > 100) {//超过指定数据就刷入数据库
                     this.videoInfoMapper.refreshVideoInfo2DB(videoInfos);
@@ -112,7 +123,7 @@ public class VideoRefreshService {
      * 将硬盘中的视频信息刷入数据库
      */
     public void refreshVideoPhysicsInfo2Db() {
-        List<VideoInfo> videoInfos = this.videoInfoMapper.findAllVideoInfo();
+        List<VideoInfoVo> videoInfos = this.videoInfoMapper.findAllVideoInfo();
 
         List<VideoPhysicsInfo> physicsInfos = new ArrayList<>();
 

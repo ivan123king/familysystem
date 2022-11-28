@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lw.familysystem.book.mapper.BookInfoMapper">
+
+    <insert id="refreshBookInfo2DB" parameterType="BookInfo">
+        insert into book_info(book_name,book_type,book_size,book_length,relative_path)
+        values
+        <foreach collection="vos" item="vo" separator=",">
+            (#{vo.book_name},#{vo.book_type},#{vo.book_size},#{vo.book_length},#{vo.relative_path})
+        </foreach>
+    </insert>
+
+    <insert id="addBookInfo" parameterType="BookInfo">
+        insert into book_info(book_name,book_type,book_size,book_length,relative_path)
+        values (#{vo.book_name},#{vo.book_type},#{vo.book_size},#{vo.book_length},#{vo.relative_path})
+    </insert>
+
+    <update id="updateBookInfo" parameterType="BookInfo">
+        update book_info t set t.book_type = #{vo.book_type},
+                               t.book_size = #{vo.book_size},
+                               t.book_length = #{vo.book_length}
+        where t.book_id = #{vo.book_id}
+    </update>
+
+    <select id="findBookInfoByPage" resultType="BookInfo" parameterType="BookInfo">
+        select t.*,
+                date_format(t.create_time,'%Y/%m/%d %H:%i') as create_time_fmt,
+                date_format(t.update_time,'%Y/%m/%d %H:%i') as update_time_fmt
+        from book_info t
+        <where>
+            <if test="vo.book_name!='' and vo.book_name!=null">
+                and t.book_name like concat(#{vo.book_name},'%')
+            </if>
+        </where>
+        order by t.create_time desc
+    </select>
+</mapper>

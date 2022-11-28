@@ -31,6 +31,8 @@ public interface VideoInfoMapper {
 
     VideoInfoVo findVideoInfoById(@Param("id")int id);
 
-    List<VideoInfo> findAllVideoInfo();
+    List<VideoInfoVo> findAllVideoInfo();
+
+    VideoInfoVo findVideoInfoByRelativePath(@Param("relativePath")String relativePath);
 
 }

@@ -1,5 +1,6 @@
 package com.lw.familysystem.vo;
 
+import com.lw.familysystem.entity.BookInfo;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -14,7 +15,10 @@ import java.util.Map;
  */
 @Data
 @Slf4j
-public class BookInfoVo {
+public class BookInfoVo extends BookInfo {
+
+    private String createTimeFmt;
+    private String updateTimeFmt;
 
     /**
      * key: 章节标题  value: file的range
@@ -51,15 +55,5 @@ public class BookInfoVo {
             rangeT = 0L;
         }
         return rangeT;
-    }
-
-    @Override
-    public String toString() {
-        return "BookInfoVo{" +
-                "titles=" + titles.size() +
-                ", bookLength=" + bookLength +
-                ", bookSize=" + bookSize +
-                ", relativePath='" + relativePath + '\'' +
-                '}';
     }
 }

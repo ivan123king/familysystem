@@ -53,4 +53,9 @@
     <select id="findVideoInfoById" resultMap="videoInfoVoResultMap" parameterType="Integer">
         select t.* from video_info t where t.info_id = #{id}
     </select>
+
+    <select id="findVideoInfoByRelativePath" parameterType="String" resultMap="videoInfoVoResultMap">
+        select t.* from video_info t
+        where t.relative_path = #{relativePath}
+    </select>
 </mapper>

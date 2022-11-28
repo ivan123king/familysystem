@@ -1,5 +1,6 @@
 package com.lw.familysystem;
 
+import com.lw.familysystem.book.BookRefreshService;
 import com.lw.familysystem.video.VideoRefreshService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +15,19 @@ public class FamilySystemApplicationTests {
 
     @Resource(name = "videoRefreshService")
     private VideoRefreshService refreshService;
+
+    @Resource(name = "bookRefreshService")
+    private BookRefreshService bookRefreshService;
+
+    @Test
+    public void bookRefreshTest(){
+        bookRefreshService.refreshBookInfo2DB();
+    }
+
+    @Test
+    public void bookTitleRefreshTest(){
+        bookRefreshService.refreshBookTitles2DB(null);
+    }
 
     @Test
     public void videoPhysicsRefreshTest() {
