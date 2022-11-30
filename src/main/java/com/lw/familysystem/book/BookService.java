@@ -41,12 +41,13 @@ public class BookService {
      * 文件内容获取  TXT格式
      * @return
      */
-    public BookDetailVo getBookContent(int bookId, int page,int size,long range){
+    public BookDetailVo getBookContent(int bookId, int page,int size,long range)  {
         BookDetailVo bookDetailVo = new BookDetailVo();
         bookDetailVo.setBookId(bookId);
 
         BookInfoVo bookInfoVo = this.bookInfoMapper.findBookById(bookId);
         String filePath = bookInfoVo.getRelative_path();
+
 
         File book = new File(ROOT_PATH+filePath);
         try(RandomAccessFile targetFile = new RandomAccessFile(book, "r")) {
@@ -81,15 +82,20 @@ public class BookService {
         return pageData;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         BookService bookService = new BookService();
         String filePath = "\\《开局百万灵石》.txt";
         filePath = "\\《人欲》.txt";
-        int page = 0;
-        int size = 10;
-        long rang = page*size;
-//        BookInfoVo bookInfoVo = bookService.getBookTitles(filePath,230,0);
-//        System.out.println(bookInfoVo);
 
+        filePath = "E:\\temp\\1.txt";
+        File file = new File(filePath);
+        RandomAccessFile fileR = new RandomAccessFile(file,"r");
+        fileR.seek(8);
+        String line = fileR.readLine();
+//        line = fileR.readLine();
+//        line = fileR.readLine();
+        line = new String(line.getBytes("ISO-8859-1"),"UTF-8");
+        log.info("length:"+line.length()+"\r\n"+line);
+        log.info("pointer:"+fileR.getFilePointer());
     }
 }

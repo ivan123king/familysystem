@@ -90,13 +90,15 @@ public class BookRefreshService {
 
                 int orderNo = 0;
 
+                long lastRange = 0;
+
                 while ((lineContent = targetFile.readLine()) != null) {
                     lineContent = new String(lineContent.getBytes("ISO-8859-1"), "UTF-8");
                     if ((lineContent.matches("=.*\\d{1,5}[、|.|\\s]?\\w*.*=")
                             || lineContent.matches(".*第[\\w{1,5}|\\D{1,3}]章[、|.]?\\w*.*")
                             || lineContent.matches("==.*=="))
                             && lineContent.length() < 40) {
-                        long titleRange = targetFile.getFilePointer() - lineContent.length() * 8;
+                        long titleRange = lastRange;
                         BookTitles bookTitles = new BookTitles();
                         bookTitles.setBook_id(bookInfoVo.getBook_id());
                         bookTitles.setTitle_name(lineContent);
@@ -111,6 +113,7 @@ public class BookRefreshService {
                         }
 
                     }
+                    lastRange = targetFile.getFilePointer();
                 }
             } catch (IOException e) {
                 log.error("", e);
